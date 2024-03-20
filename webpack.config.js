@@ -5,7 +5,7 @@ module.exports = {
     mode: 'development',
   entry: './src/index.js',
   output: {
-    filename: 'main.js',
+    filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),
     clean: true,
   },
@@ -32,7 +32,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
         title: 'To-Do-List',
-        template: '/src/index.html'
+        template: './src/index.html'
     }),
   ],
   optimization: {
