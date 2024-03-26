@@ -2,7 +2,7 @@
 
 function createSvgX() {
     const svgX = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgX.setAttribute('viewBOX', '0 0 24 24');
+    svgX.setAttribute('viewBox', '0 0 24 24');
     const pathX = document.createElementNS("http://www.w3.org/2000/svg", 'path');
     pathX.setAttribute("d","M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z");
     svgX.appendChild(pathX);
@@ -18,6 +18,16 @@ function createSvgPencil() {
     svgPencil.appendChild(pathPencil);
 
     return svgPencil
+}
+
+function createSvgPlus() {
+    const svgPlus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svgPlus.setAttribute('viewBox', '0 0 24 24');
+    const pathPlus = document.createElementNS("http://www.w3.org/2000/svg", 'path');
+    pathPlus.setAttribute("d","M18.5 2H5.5C3.6 2 2 3.6 2 5.5V18.5C2 20.4 3.6 22 5.5 22H16L22 16V5.5C22 3.6 20.4 2 18.5 2M13 16H11V13H8V11H11V8H13V11H16V13H13V16M15 20V18.5C15 16.6 16.6 15 18.5 15H20L15 20Z");
+    svgPlus.appendChild(pathPlus);
+
+    return svgPlus
 }
 
 function createSvgCheck() {
@@ -40,13 +50,25 @@ function createSvgTrash() {
     return svgTrash
 }
 
+//maybe not best practice bc it creates + adds listener + caches for dialog
+/* function createNoteButton() {
+    const noteButton = document.createElement('button');
+    noteButton.setAttribute('id','add');
+    noteButton.appendChild(createSvgPlus());
+
+    const noteDialog = document.getElementById('noteDialog');
+
+    return {noteButton, noteDialog}
+} */
+
 function createNote() {
     let noteContainer = document.createElement('div');
     noteContainer.className = 'note';
 
     const deleteButton = document.createElement('button');
     deleteButton.setAttribute('id','delete');
-    deleteButton.appendChild(createSvgX())
+    deleteButton.appendChild(createSvgX());
+    
 
     let headArea = document.createElement('div');
     let title = document.createElement('h2');
@@ -57,6 +79,7 @@ function createNote() {
     headArea.appendChild(checkbox);
 
     let description = document.createElement('p');
+    description.setAttribute('id','des');
     let duedate = document.createElement('p');
     duedate.setAttribute('id','date')
 

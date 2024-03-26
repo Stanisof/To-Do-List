@@ -192,7 +192,7 @@ p {
     fill: #088faf;
 }
 
-#newNote {
+#noteDialog {
     left: calc(50vw - 250px);
     top: 150px;
     width: 500px;
@@ -201,14 +201,14 @@ p {
     padding: 35px;
 }
 
-#newNote form {
+#noteDialog form {
     display: grid;
     grid-template-columns: 1fr 3fr;
     height: 100%;
     row-gap: 5px;
 }
 
-#newNote label {
+#noteDialog label {
     grid-column: 1;
     align-self: center;
 }
@@ -224,7 +224,7 @@ fieldset {
     grid-template-columns: 1fr 1fr 1fr;
 }
 
-#newNote input {
+#noteDialog input {
     grid-column: 2 / 4;
     background-color: #85d18d;
 }
