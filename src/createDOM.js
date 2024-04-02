@@ -68,7 +68,7 @@ function createNote() {
     const deleteButton = document.createElement('button');
     deleteButton.setAttribute('id','delete');
     deleteButton.appendChild(createSvgX());
-    deleteButton.addEventListener('click', () => noteContainer.remove())
+    //deleteButton.addEventListener('click', () => noteContainer.remove())
 
     let headArea = document.createElement('div');
     let title = document.createElement('h2');

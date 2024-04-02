@@ -7,6 +7,8 @@ const openNoteForm = document.getElementById('add');
 const noteDialog = document.getElementById('noteDialog');
 const noteForm = document.getElementById('noteForm');
 
+console.log(noteForm)
+
 class Note {
     constructor(title, description, duedate, priority) {
         this.title = title;
@@ -22,28 +24,37 @@ let projects = []
 
 function homeComponent() {
     let homeArray = [];
-    projects.push(homeArray)
+    pushToArray(projects, homeArray)
 console.log(homeArray)
 
-    displayElement(projects[0]);
+    displayElement(projects[0]); // auch kaka weil [0]
 console.log(projects)
+
     openNoteForm.addEventListener('click', () => noteDialog.showModal());
+    //das kann glaube ich auch global- wichtig ist wohin submitted wird
 
-    noteForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        e.stopImmediatePropagation();
+    noteForm.addEventListener('submit', (e) => addNote(e, projects[0]))
+}
 
-        const fd = new FormData(noteForm);
+function pushToArray(array, object) {
+    if(!array.includes(object))
+    array.push(object)
+}
+
+function addNote(e, item) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const fd = new FormData(noteForm);
 
         let note = new Note(fd.get('task'), fd.get('description'), fd.get('duedate'), fd.get('priority'));
-        
-        pushToArray(projects[0], note);
+            
+        pushToArray(item, note);
         displayElement(projects[0]);
 
         noteDialog.close();
         noteForm.reset();
-        console.log(projects[0])
-    })
+        console.log(item)
+    
 }
 
 function cacheNoteElements() {
@@ -58,7 +69,6 @@ function cacheNoteElements() {
 }
 
 
-
 function displayElement(array) {
     let allNotes = document.querySelectorAll('.note h2')
     
@@ -68,7 +78,7 @@ function displayElement(array) {
         
         if(!isCreated) {
             
-            array[i].index = i;
+            array[i].index = i; // könnte auch beim pushen hinzugefügt werden
 
             content.appendChild(createNote());
             cacheNoteElements().title.textContent = array[i].title;
@@ -76,34 +86,74 @@ function displayElement(array) {
             cacheNoteElements().duedate.textContent = array[i].duedate;
             cacheNoteElements().noteContainer.setAttribute('data-priority', array[i].priority) 
             
-            removeFromArray(array, array[i], cacheNoteElements().deleteButton)
+
+           let passArray = array;
+           let passObject = array[i]
+
+            cacheNoteElements().deleteButton.addEventListener('click', (e) => {
+                removeFromArray(passArray, passObject);
+                removeFromDOM(e);
+                
+            })
+
+            cacheNoteElements().editButton.addEventListener('click', (e) => {
+                editNote(array[i]);
+                removeFromArray(passArray, passObject);
+                removeFromDOM(e);
+            })
         }
     }
-
 }
 
-function pushToArray(array, object) {
-    array.push(object)
-}
 
-function removeFromArray(array, object, button) {
+function removeFromArray(array, object) {
 
-    button.addEventListener('click', () => {
       array.splice(object.index,1);
   
       array.forEach((item)=> {
-        if(item.dataIndex > object.dataIndex) 
-        item.dataIndex -= 1;
+        if(item.index > object.index) 
+        item.index -= 1;
       })
       console.log(array);
-      //noteContainer.remove();
-  
-    })
-  } 
+      //noteContainer.remove(); --> Ist im DOM Build enthalten
+}
+
+function removeFromDOM(e) {
+    let button = e.currentTarget;
+    let parent = button.parentNode;
+    parent.remove();
+}
+
+
+function editNote(object) {
+
+    let taskInput = document.getElementById('task');
+    let descriptionInput = document.getElementById('description');
+    let dateInput = document.getElementById('duedate');
+    let lowInput = document.getElementById('low');
+    let middleInput = document.getElementById('middle');
+    let highInput = document.getElementById('high');
+
+    taskInput.setAttribute('value', object.title);
+    descriptionInput.value = object.description;
+    dateInput.setAttribute('value', object.duedate);
+    switch(object.priority) {
+        case('low'): lowInput.setAttribute('checked', '')
+            break
+        case('middle'): middleInput.setAttribute('checked', '')
+            break
+        case('high'): highInput.setAttribute('checked', '');
+            break
+    }
+
+    noteDialog.showModal();
+}
+
+
+
 
 
 home.addEventListener('click', ()=> homeComponent());
-
 
 let noteIns = new Note("Task", "Long description of words", "2024-03-21", "middle");
 let newTask = new Note("Cleaning", "I have to clean the whole godamn house", "2024-04-10", "low")
