@@ -1,13 +1,20 @@
 import './style.css';
-import { createNote } from './createDOM';
+import { createNote , createProject} from './createDOM';
 
 const home = document.getElementById('home');
 const content = document.getElementById('content');
+const projectBar = document.getElementById('projects')
 const openNoteForm = document.getElementById('add');
 const noteDialog = document.getElementById('noteDialog');
 const noteForm = document.getElementById('noteForm');
+const projectDialog = document.getElementById('projectDialog');
+const projectForm = document.getElementById('projectForm');
+const openProjectForm = document.getElementById('newProject');
 
-console.log(noteForm)
+openProjectForm.addEventListener('click', () => projectDialog.showModal())
+openNoteForm.addEventListener('click', () => noteDialog.showModal());
+
+
 
 class Note {
     constructor(title, description, duedate, priority) {
@@ -19,42 +26,108 @@ class Note {
     }
 }
 
-let projects = []
+let projects = [];
+let homeArray = [];
 
+let homeTitle = "title";
+pushToArray(homeArray, homeTitle)
+pushToArray(projects, homeArray);
 
-function homeComponent() {
-    let homeArray = [];
-    pushToArray(projects, homeArray)
-console.log(homeArray)
+let noteIns = new Note("Task", "Long description of words", "2024-03-21", "middle");
+let newTask = new Note("Cleaning", "I have to clean the whole godamn house", "2024-04-10", "low")
+let task = new Note("coding", "i have to code a lot and it huerts", "2024-03-30", "high");
 
-    displayElement(projects[0]); // auch kaka weil [0]
-console.log(projects)
-
-    openNoteForm.addEventListener('click', () => noteDialog.showModal());
-    //das kann glaube ich auch global- wichtig ist wohin submitted wird
-
-    noteForm.addEventListener('submit', (e) => addNote(e, projects[0]))
-}
+pushToArray(projects[0], noteIns);
+pushToArray(projects[0], newTask);
+pushToArray(projects[0], task);
 
 function pushToArray(array, object) {
     if(!array.includes(object))
     array.push(object)
 }
 
-function addNote(e, item) {
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    const fd = new FormData(noteForm);
+function homeComponent(projectsArray) {
+console.log(homeArray)
+
+    displayNote(projects[0]); // auch kaka weil [0]
+
+console.log(projects)
+
+    addNote(projects[0]);
+    //noteForm.addEventListener('submit', (e) => addNote(e, projects[0]))
+}
+
+/* 
+function (projectsArray) {
+    projectsArray = projects;
+    let newProject = [];
+    pushToArray(projectsArray, newProject)
+
+//console.log(homeArray)
+
+    displayNote(projects[0]); // auch kaka weil [0]
+//console.log(projects)
+
+    openNoteForm.addEventListener('click', () => noteDialog.showModal());
+    //das kann glaube ich auch global- wichtig ist wohin submitted wird
+
+    noteForm.addEventListener('submit', (e) => addNote(e, projects[0]))
+} */
+
+
+
+function addNote(array) {
+    
+    noteForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        const fd = new FormData(noteForm);
 
         let note = new Note(fd.get('task'), fd.get('description'), fd.get('duedate'), fd.get('priority'));
-            
-        pushToArray(item, note);
-        displayElement(projects[0]);
-
+                
+        pushToArray(array, note);
+        displayNote(array);
         noteDialog.close();
         noteForm.reset();
-        console.log(item)
-    
+    console.log(array)
+    })
+}
+
+function addProject(e, title) {
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    const fd = new FormData(projectForm);
+
+    let newProject = []
+    let projectTitle = `${title}`;
+    newProject.push(projectTitle);
+
+    pushToArray(projects, newProject);
+    displayProject(projects);
+    projectDialog.close();
+    projectForm.reset();
+}
+
+function cacheProjectElement() {
+    let projectContainer = document.querySelector('#projects > div:last-child');
+    let projectTitle = document.querySelector('#projects > div:last-child p');
+    let trashProject = document.querySelector('#projects > div:last-child #trash');
+
+    return {projectContainer, projectTitle, trashProject}
+}
+
+function displayProjectDOM(array) {
+    let allProjects = document.querySelectorAll('#projects p');
+
+    for (let i = 0; i < array.length; i++) {
+        let isCreated = Array.from(allProjects).some((instance) => instance == array[i]);
+
+        if(!isCreated) {
+            projectBar.appendChild(createProject());
+            cacheProjectElement().projectTitle.textContent = array[i][0]
+        }
+    }
+
 }
 
 function cacheNoteElements() {
@@ -68,11 +141,10 @@ function cacheNoteElements() {
     return {noteContainer, title, description, duedate, deleteButton, editButton};
 }
 
-
-function displayElement(array) {
+function displayNote(array) {
     let allNotes = document.querySelectorAll('.note h2')
     
-    for (let i = 0; i < array.length; i++) {
+    for (let i = 1; i < array.length; i++) {
     
         let isCreated = Array.from(allNotes).some((instance) => instance.textContent == array[i].title)
         
@@ -155,14 +227,7 @@ function editNote(object) {
 
 home.addEventListener('click', ()=> homeComponent());
 
-let noteIns = new Note("Task", "Long description of words", "2024-03-21", "middle");
-let newTask = new Note("Cleaning", "I have to clean the whole godamn house", "2024-04-10", "low")
-let task = new Note("coding", "i have to code a lot and it huerts", "2024-03-30", "high");
 
 homeComponent();
-
-pushToArray(projects[0], noteIns);
-pushToArray(projects[0], newTask);
-pushToArray(projects[0], task);
 
 console.log(projects)

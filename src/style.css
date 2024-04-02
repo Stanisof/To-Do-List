@@ -48,7 +48,7 @@ h1 {
     z-index: 2;
 }
 
-#newProject {
+#projectDialog {
     background-color: #47adc6;
     border-radius: 8px;
     padding: 4px 5px;
@@ -61,12 +61,12 @@ h1 {
 }
 
 
-#newProject form {
+#projectDialog form {
     display: flex;
     align-items: center;
 }
 
-#newProject input {
+#projectDialog input {
     background-color: #088faf;
 }
 
@@ -93,24 +93,25 @@ svg {
     filter: drop-shadow(1px 3px 5px rgb(0 0 0 / 0.4));
 }
 
-#new {
+#newProject {
     position: absolute;
     right: 20px;
     bottom: 20px;
 }
 
 #add {
+    z-index: 2;
     position: fixed;
     right: 5px;
     bottom: 0px;
 }
 
-#new > svg:hover,
+#newProject > svg:hover,
 #add > svg:hover {
     fill: #47adc6;
 }
 
-#new > svg:active,
+#newProject > svg:active,
 #add > svg:active {
     fill: #088faf;
 }

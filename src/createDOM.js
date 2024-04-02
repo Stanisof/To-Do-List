@@ -99,14 +99,16 @@ function createNote() {
 }
 
 function createProject() {
-    let container = document.createElement('div');
-    let title = document.createElement('p');
+    let projectContainer = document.createElement('div');
+    let projectTitle = document.createElement('p');
     const trashButton = document.createElement('button');
     trashButton.appendChild(createSvgTrash());
     trashButton.setAttribute('id', 'trash');
-    container.appendChild(title);
-    container.appendChild(trashButton);
+    projectContainer.appendChild(projectTitle);
+    projectContainer.appendChild(trashButton);
+
+    return projectContainer
 }
 
 
-export {createNote}
+export {createNote, createProject}
