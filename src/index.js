@@ -6,7 +6,7 @@ const content = document.getElementById('content');
 const projectBar = document.getElementById('projects')
 const openNoteForm = document.getElementById('add');
 const noteDialog = document.getElementById('noteDialog');
-const noteForm = document.getElementById('noteForm');
+let noteForm = document.getElementById('noteForm');
 const projectDialog = document.getElementById('projectDialog');
 const projectForm = document.getElementById('projectForm');
 const openProjectForm = document.getElementById('newProject');
@@ -31,34 +31,28 @@ let homeArray = [];
 
 let homeTitle = "title";
 pushToArray(homeArray, homeTitle)
-pushToArray(projects, homeArray);
 
 let noteIns = new Note("Task", "Long description of words", "2024-03-21", "middle");
 let newTask = new Note("Cleaning", "I have to clean the whole godamn house", "2024-04-10", "low")
 let task = new Note("coding", "i have to code a lot and it huerts", "2024-03-30", "high");
 
-pushToArray(projects[0], noteIns);
-pushToArray(projects[0], newTask);
-pushToArray(projects[0], task);
+pushToArray(homeArray, noteIns);
+pushToArray(homeArray, newTask);
+pushToArray(homeArray, task);
 
 function pushToArray(array, object) {
     if(!array.includes(object))
     array.push(object)
 }
 
-function homeComponent(projectsArray) {
-console.log(homeArray)
-
-    displayNote(projects[0]); // auch kaka weil [0]
-
-console.log(projects)
-
-    addNote(projects[0]);
-    //noteForm.addEventListener('submit', (e) => addNote(e, projects[0]))
+function homeComponent() {
+    displayNote(homeArray);
+    addNote(homeArray);
+    console.log(homeArray)
 }
 
 /* 
-function (projectsArray) {
+function MAYBEIIFE(projectsArray) {
     projectsArray = projects;
     let newProject = [];
     pushToArray(projectsArray, newProject)
@@ -77,6 +71,10 @@ function (projectsArray) {
 
 
 function addNote(array) {
+
+let newNoteForm = noteForm.cloneNode(true);
+noteForm.parentNode.replaceChild(newNoteForm,noteForm);
+noteForm = newNoteForm;
     
     noteForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -93,17 +91,23 @@ function addNote(array) {
     })
 }
 
-function addProject(e, title) {
+projectForm.addEventListener('submit', (e)=> {
     e.preventDefault();
-    e.stopImmediatePropagation();
+    e.stopImmediatePropagation(); 
     const fd = new FormData(projectForm);
 
+    addProject(fd.get('title'))
+})
+
+function addProject(title) {
     let newProject = []
     let projectTitle = `${title}`;
     newProject.push(projectTitle);
 
     pushToArray(projects, newProject);
-    displayProject(projects);
+    displayProjectDOM(projects);
+    addNote(newProject);
+console.log(projects)
     projectDialog.close();
     projectForm.reset();
 }
@@ -120,15 +124,23 @@ function displayProjectDOM(array) {
     let allProjects = document.querySelectorAll('#projects p');
 
     for (let i = 0; i < array.length; i++) {
-        let isCreated = Array.from(allProjects).some((instance) => instance == array[i]);
+        let isCreated = Array.from(allProjects).some((instance) => instance.textContent == array[i][0]);
 
         if(!isCreated) {
             projectBar.appendChild(createProject());
-            cacheProjectElement().projectTitle.textContent = array[i][0]
+            cacheProjectElement().projectTitle.textContent = array[i][0];
+
+            let passArray = array[i]
+
+            cacheProjectElement().projectContainer.addEventListener('click', () => {
+                let allNotes = content.querySelectorAll('.note');
+                allNotes.forEach((node) => node.remove());
+                displayNote(passArray);
+            })
         }
     }
-
 }
+
 
 function cacheNoteElements() {
     let noteContainer = document.querySelector('.note:last-child');
