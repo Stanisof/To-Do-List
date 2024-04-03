@@ -32,6 +32,10 @@ h1 {
     margin-bottom: 15px;
 }
 
+#projects > .selected {
+    background-color: #088faf;
+}
+
 #projects > div {
     position: relative;
     padding: 10px 35px ;
@@ -74,7 +78,6 @@ h1 {
     width: 40px;
 }
 
-
 #projects > div:hover {
     background-color: #088faf;
 }
@@ -82,6 +85,7 @@ h1 {
 #projects > div:active {
     background-color: #47adc6;
 }
+
 
 button {
     width: 100px;
@@ -245,6 +249,12 @@ fieldset {
     background-color: #47adc6;
 }
 
+
+
+[checked] #edit svg {
+    fill: #646464;
+}
+
 [data-priority="low"] {
     background-color: #ADF7B6;
 }
@@ -257,3 +267,7 @@ fieldset {
     background-color: #FFC09F;
 }
 
+[checked] {
+    background-color: #b2b2b2;
+    text-decoration: line-through;
+}
