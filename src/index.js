@@ -1,5 +1,6 @@
 import './style.css';
 import { createNote , createProject} from './createDOM';
+import {format} from 'date-fns';
 
 const home = document.getElementById('home');
 const content = document.getElementById('content');
@@ -25,6 +26,11 @@ class Note {
         this.duedate = duedate;
         this.priority = priority;
         this.status = false;
+        this.formattedDate = this.formatDate();
+    }
+
+    formatDate() {
+    return  format(new Date(this.duedate), 'dd.MMMM');
     }
 }
 
@@ -91,7 +97,7 @@ noteForm = newNoteForm;
         const fd = new FormData(noteForm);
 
         let note = new Note(fd.get('task'), fd.get('description'), fd.get('duedate'), fd.get('priority'));
-                
+    console.log(fd.get('duedate'))
         pushToArray(array, note);
         displayNote(array);
         noteDialog.close();
@@ -166,7 +172,7 @@ function displayNote(array) {
             content.appendChild(createNote());
             cacheNoteElements().title.textContent = array[i].title;
             cacheNoteElements().description.textContent = array[i].description;
-            cacheNoteElements().duedate.textContent = array[i].duedate;
+            cacheNoteElements().duedate.textContent = array[i].formattedDate;
             cacheNoteElements().noteContainer.setAttribute('data-priority', array[i].priority) 
             
 
