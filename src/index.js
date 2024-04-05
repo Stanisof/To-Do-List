@@ -1,6 +1,7 @@
 import './style.css';
 import { createNote , createProject} from './createDOM';
 import {format} from 'date-fns';
+//import { data } from './storage';
 
 const home = document.getElementById('home');
 const content = document.getElementById('content');
@@ -14,9 +15,19 @@ const openProjectForm = document.getElementById('newProject');
 
 let mainArray = [];
 let homeArray = [];
-let homeTitle = "Home";
-pushToArray(homeArray, homeTitle);
 
+/* let data = {
+    sendData: function(array) {
+        localStorage.clear();
+        localStorage.setItem("projectsArray", JSON.stringify(array));
+    },
+    retrieveData: function(string) {
+        //localStorage.removeItem(string);
+        return JSON.parse(localStorage.getItem(string))
+    },
+}
+
+data.sendData(mainArray); */
 
 
 class Note {
@@ -52,9 +63,9 @@ function pushToArray(array, object) {
 }
 
 function homeComponent() {
-    removeAllContent();
+    removePreviousContent();
     addNote(homeArray)
-    displayNote(homeArray);
+    renderNote(homeArray);
 console.log(homeArray);
 console.log(mainArray);
 }
@@ -68,27 +79,26 @@ projectForm.addEventListener('submit', (e)=> {
 })
 
 function addProject(title) {
-    let newProject = []
-    let projectTitle = `${title}`;
-    newProject.push(projectTitle);
+    let newProject = {}
+    newProject.title = `${title}`;
+    newProject.notes = []
 
-    pushToArray(mainArray, newProject);// fügt das neue Projekt in das mainArray hinzu
-    displayProjectDOM(mainArray); // zeigt die Projekte in der sidebar an
-    addNote(newProject); //ist der Listener für Submit form
-    removeAllContent(); // entfernt erst die Notizen von anderem Projekt
-    displayNote(newProject); // zeigt die Notizen im content Bereich an
-
+    
+    pushToArray(mainArray, newProject);// fügt das ProjObj zu mainArray hinzu
+    renderProject(mainArray);
+    addNote(newProject.notes) // soll neue Notiz zum array im Project-obj hinzufügen
+    removePreviousContent();
+    renderNote(newProject.notes);
 console.log(mainArray)
-
     projectDialog.close();
     projectForm.reset();
 }
 
-function addNote(array) {
+function addNote(array) { //hier wird das note Array aus projectObject verarbeitet, außer beim Homecomponent
 
-let newNoteForm = noteForm.cloneNode(true);
-noteForm.parentNode.replaceChild(newNoteForm,noteForm);
-noteForm = newNoteForm;
+    let newNoteForm = noteForm.cloneNode(true);
+    noteForm.parentNode.replaceChild(newNoteForm,noteForm);
+    noteForm = newNoteForm;
     
 
     noteForm.addEventListener('submit', (e) => {
@@ -97,17 +107,19 @@ noteForm = newNoteForm;
         const fd = new FormData(noteForm);
 
         let note = new Note(fd.get('task'), fd.get('description'), fd.get('duedate'), fd.get('priority'));
-    console.log(fd.get('duedate'))
+
         pushToArray(array, note);
-        displayNote(array);
+        renderNote(array);
+
         noteDialog.close();
         noteForm.reset();
-    console.log(array)
+    console.log(array);
+//hier muss aber das mainArray überschrieben werden mit der neuen Notiz
     })
 }
 
 
-function cacheProjectElement() {
+function cacheDOMProject() {
     let projectContainer = document.querySelector('#projects > div:last-child');
     let projectTitle = document.querySelector('#projects > div:last-child p');
     let trashProject = document.querySelector('#projects > div:last-child #trash');
@@ -115,30 +127,34 @@ function cacheProjectElement() {
     return {projectContainer, projectTitle, trashProject}
 }
 
-function displayProjectDOM(array) {
+function renderProject(array) { // hier kommt das mainArray rein
     let allProjects = document.querySelectorAll('#projects p');
+    //array = data.retrieveData("projectsArray")
 
     for (let i = 0; i < array.length; i++) {
-        let isCreated = Array.from(allProjects).some((instance) => instance.textContent == array[i][0]);
+        let isCreated = Array.from(allProjects).some((instance) => instance.textContent == array[i].title);
+
+        array[i].index = i; // hier wird position in main gespreichert
 
         if(!isCreated) {
             projectBar.appendChild(createProject());
-            cacheProjectElement().projectTitle.textContent = array[i][0];
+            cacheDOMProject().projectTitle.textContent = array[i].title;
 
-            let subArray = array[i]
+            let notesArray = array[i].notes //notes Array aus project-obj.
+            let projObj = array[i];
 
-            cacheProjectElement().projectContainer.addEventListener('click', (e) => {
-                removeAllContent();
-                addNote(subArray);
-                displayNote(subArray);
+            cacheDOMProject().projectContainer.addEventListener('click', (e) => {
+                removePreviousContent();
+                addNote(notesArray);
+                renderNote(notesArray);
                 
                 let allElements = document.querySelectorAll('#projects > div');
                 allElements.forEach((item)=> item.classList.remove('selected'));
                 e.currentTarget.classList.add('selected');
             })
 
-            cacheProjectElement().trashProject.addEventListener('click',(e)=> {
-                removeFromArray(mainArray, subArray);
+            cacheDOMProject().trashProject.addEventListener('click',(e)=> {
+                removeFromArray(mainArray, projObj); // entfernt nur index 1 > die connecteten indices stimmen auch nicht mehr
                 removeFromDOM(e);
             })
         }
@@ -146,7 +162,7 @@ function displayProjectDOM(array) {
 }
 
 
-function cacheNoteElements() {
+function cacheDOMNote() {
     let noteContainer = document.querySelector('.note:last-child');
     let title = document.querySelector('.note:last-child h2');
     let description = document.querySelector('.note:last-child #des');
@@ -158,10 +174,10 @@ function cacheNoteElements() {
     return {noteContainer, title, description, duedate, deleteButton, editButton, checkBox};
 }
 
-function displayNote(array) {
+function renderNote(array) { //recieved das notes Array aus projObj.
     let allNotes = document.querySelectorAll('.note h2');
     
-    for (let i = 1; i < array.length; i++) {
+    for (let i = 0; i < array.length; i++) {
     
         let isCreated = Array.from(allNotes).some((instance) => instance.textContent == array[i].title)
         
@@ -170,28 +186,28 @@ function displayNote(array) {
             array[i].index = i; // könnte auch beim pushen hinzugefügt werden
 
             content.appendChild(createNote());
-            cacheNoteElements().title.textContent = array[i].title;
-            cacheNoteElements().description.textContent = array[i].description;
-            cacheNoteElements().duedate.textContent = array[i].formattedDate;
-            cacheNoteElements().noteContainer.setAttribute('data-priority', array[i].priority) 
+            cacheDOMNote().title.textContent = array[i].title;
+            cacheDOMNote().description.textContent = array[i].description;
+            cacheDOMNote().duedate.textContent = array[i].formattedDate;
+            cacheDOMNote().noteContainer.setAttribute('data-priority', array[i].priority) 
             
 
            let passArray = array;
            let passObject = array[i]
 
-            cacheNoteElements().deleteButton.addEventListener('click', (e) => {
+            cacheDOMNote().deleteButton.addEventListener('click', (e) => {
                 removeFromArray(passArray, passObject);
                 removeFromDOM(e);
                 
             })
 
-            cacheNoteElements().editButton.addEventListener('click', (e) => {
+            cacheDOMNote().editButton.addEventListener('click', (e) => {
                 editNote(passObject);
                 removeFromArray(passArray, passObject);
                 removeFromDOM(e);
             })
 
-            cacheNoteElements().checkBox.addEventListener('change', (e) => {
+            cacheDOMNote().checkBox.addEventListener('change', (e) => {
                 let checkBox = e.currentTarget;
                 let parent = checkBox.parentNode.parentNode;
                 parent.toggleAttribute('checked')
@@ -218,7 +234,7 @@ function removeFromDOM(e) {
     parent.remove();
 }
 
-function removeAllContent() {
+function removePreviousContent() {
     let allElements = content.querySelectorAll('.note');
     allElements.forEach((node) => node.remove());
 }
