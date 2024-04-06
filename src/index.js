@@ -65,7 +65,6 @@ openNoteForm.addEventListener('click', () => noteDialog.showModal());
 function pushToArray(array, object) {
     if(!array.includes(object)) {
     array.push(object);
-    object.projectIndex = array.length-1;
     }
 }
 
@@ -97,9 +96,9 @@ function addProject(title) {
 
 console.log(mainArray);
 
-    addNote(mainArray, newProject.notes) // soll neue Notiz zum array im Project-obj hinzufügen
+    addNote(mainArray, newProject) // soll neue Notiz zum array im Project-obj hinzufügen
     removePreviousContent();
-    renderNote(newProject.notes);
+    renderNote(newProject);
 
     data.sendData(mainArray);
 
@@ -108,7 +107,7 @@ console.log(mainArray)
     projectForm.reset();
 }
 
-function addNote(main, notesArray) { //hier wird das note Array aus projectObject verarbeitet, außer beim Homecomponent
+function addNote(main, projectArray) { //hier wird das note Array aus projectObject verarbeitet, außer beim Homecomponent
 
     let newNoteForm = noteForm.cloneNode(true);
     noteForm.parentNode.replaceChild(newNoteForm,noteForm);
@@ -122,8 +121,8 @@ function addNote(main, notesArray) { //hier wird das note Array aus projectObjec
 
         let note = new Note(fd.get('task'), fd.get('description'), fd.get('duedate'), fd.get('priority'));
         
-        pushToArray(notesArray, note);
-        renderNote(notesArray);
+        pushToArray(projectArray.notes, note);
+        renderNote(projectArray);
 
         data.sendData(main);
 
@@ -166,8 +165,8 @@ function renderProject(array) { // hier kommt das mainArray rein
                 let mainArray = data.retrieveData("projectArray");
 
 
-                addNote(mainArray, mainArray[index].notes); //wenn ein Project gelöscht wird, dann stimmt i nicht mehr
-                renderNote(mainArray[index].notes);
+                addNote(mainArray, mainArray[index]); //wenn ein Project gelöscht wird, dann stimmt i nicht mehr
+                renderNote(mainArray[index]);
                 
                 let allElements = document.querySelectorAll('#projects > div');
                 allElements.forEach((item)=> item.classList.remove('selected'));
@@ -175,10 +174,31 @@ function renderProject(array) { // hier kommt das mainArray rein
             })
 
             cacheDOMProject().trashProject.addEventListener('click',(e)=> {
-                let mainArray = data.retrieveData("projectArray");                
+                let mainArray = data.retrieveData("projectArray");
+                let parent = e.currentTarget.parentNode
+                let allDivs = document.querySelectorAll('#projects > div');
+                
+                mainArray.splice(parent.dataset.index,1);
+                mainArray[parent.dataset.index].notes.forEach((item) => {
+                    if(parent.dataset.index > item.projectIndex)
+                    item.projectIndex -=1
+                })
+                mainArray.forEach((item) => {
+                    if(item.index > parent.dataset.index)
+                    item.index -= 1
+                });
 
-                removeFromArray(mainArray, projectObject); // entfernt nur index 1 > die connecteten indices stimmen auch nicht mehr
-                removeFromDOM(e);
+                allDivs.forEach((item) => {
+                    if(item.dataset.index > parent.dataset.index) {
+                        item.dataset.index -= 1;
+                        }
+                    })
+
+                parent.remove()
+                /* removeFromArray(mainArray, projectObject); // entfernt nur index 1 > die connecteten indices stimmen auch nicht mehr
+                console.log(mainArray);
+                console.log(projectObject) */
+                //removeFromDOM(e);
                 console.log(mainArray);
 
                 data.sendData(mainArray)
@@ -202,34 +222,50 @@ function cacheDOMNote() {
 
 function renderNote(array) { //recieved das notes Array aus projObj. -> newProject.notes
     let allNotes = document.querySelectorAll('.note h2');
+    let container = array;
+    let notesArray = array.notes
+    notesArray.forEach((item) => item.projectIndex = container.index)
+
+
+    for (let i = 0; i < notesArray.length; i++) {
     
-    for (let i = 0; i < array.length; i++) {
-    
-        let isCreated = Array.from(allNotes).some((instance) => instance.textContent == array[i].title)
+        let isCreated = Array.from(allNotes).some((instance) => instance.textContent == notesArray[i].title)
         
         if(!isCreated) {
             
-            array[i].index = i; // könnte auch beim pushen hinzugefügt werden
+            notesArray[i].index = i; // könnte auch beim pushen hinzugefügt werden
 
             content.appendChild(createNote());
-            cacheDOMNote().title.textContent = array[i].title;
-            cacheDOMNote().description.textContent = array[i].description;
-            cacheDOMNote().duedate.textContent = array[i].formattedDate;
-            cacheDOMNote().noteContainer.setAttribute('data-priority', array[i].priority) 
+            cacheDOMNote().title.textContent = notesArray[i].title;
+            cacheDOMNote().description.textContent = notesArray[i].description;
+            cacheDOMNote().duedate.textContent = notesArray[i].formattedDate;
+            cacheDOMNote().noteContainer.setAttribute('data-priority', notesArray[i].priority);
+            cacheDOMNote().noteContainer.dataset.index = i;
             
 
-           let passArray = array;
-           let passObject = array[i]
-
             cacheDOMNote().deleteButton.addEventListener('click', (e) => {
-                removeFromArray(passArray, passObject);
-                removeFromDOM(e);
+                let mainArray = data.retrieveData("projectArray");
+                let allNotes = document.querySelectorAll('#content > div');
+                let parent = e.currentTarget.parentNode;
+                let mainPosition = notesArray[0].projectIndex
+
+                notesArray.splice(parent.dataset.index,1);
+                allNotes.forEach((item)=> {
+                    if(item.dataset.index > parent.dataset.index)
+                    item.dataset.index -= 1;
+                })
+                //removeFromArray(notesArray, notesArray[i]);
+                mainArray[mainPosition].notes = notesArray;
+
+                parent.remove()
+                data.sendData(mainArray);
+                //removeFromDOM(e);
                 
             })
 
             cacheDOMNote().editButton.addEventListener('click', (e) => {
-                editNote(passObject);
-                removeFromArray(passArray, passObject);
+                editNote(notesArray[i]);
+                removeFromArray(notesArray, notesArray[i]);
                 removeFromDOM(e);
             })
 
@@ -302,5 +338,5 @@ function editNote(object) {
 }
 
 home.addEventListener('click', ()=> homeComponent());
-homeComponent();
+//homeComponent();
 renderProject(data.retrieveData("projectArray"));
