@@ -78,11 +78,11 @@ let project = {
 
         let mainArray = data.retrieveData("projectArray");
 
-        this.pushToArray(mainArray, newProject);// fügt das neue Projekt in das mainArray hinzu
-        this.renderProjects(mainArray); // zeigt die Projekte in der sidebar an
-        this.addNote(mainArray, newProject); //ist der Listener für Submit form
-        this.removePreviousContent(); // entfernt erst die Notizen von anderem Projekt
-        this.renderNotes(newProject); // zeigt die Notizen im content Bereich an
+        this.pushToArray(mainArray, newProject);
+        this.renderProjects(mainArray); 
+        this.addNote(mainArray, newProject);
+        this.removePreviousContent();
+        this.renderNotes(newProject);
 
         data.sendData(mainArray);
 
