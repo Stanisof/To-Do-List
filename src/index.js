@@ -92,9 +92,9 @@ function addProject(title) {
 
     let mainArray = data.retrieveData("projectArray");
 
-    pushToArray(mainArray, newProject);// fügt das ProjObj zu mainArray hinzu
+    pushToArray(mainArray, newProject);
     renderProject(mainArray);
-    addNote(mainArray, newProject) // soll neue Notiz zum array im Project-obj hinzufügen
+    addNote(mainArray, newProject);
     removePreviousContent();
     renderNote(newProject);
 
@@ -104,7 +104,7 @@ function addProject(title) {
     projectForm.reset();
 }
 
-function addNote(main, projectObject) { //hier wird das note Array aus projectObject verarbeitet, außer beim Homecomponent
+function addNote(main, projectObject) {
 
     let newNoteForm = noteForm.cloneNode(true);
     noteForm.parentNode.replaceChild(newNoteForm,noteForm);
@@ -137,13 +137,13 @@ function cacheDOMProject() {
     return {projectContainer, projectTitle, trashProject}
 }
 
-function renderProject(array) { // hier kommt das mainArray rein
+function renderProject(array) {
     let allProjects = document.querySelectorAll('#projects p');
 
     for (let i = 1; i < array.length; i++) {
         let isCreated = Array.from(allProjects).some((instance) => instance.textContent == array[i].title);
 
-        array[i].index = i; // hier wird position des Projekts in main gespeichert
+        array[i].index = i; 
 
         if(!isCreated) {
             projectBar.appendChild(createProject());
@@ -155,7 +155,7 @@ function renderProject(array) { // hier kommt das mainArray rein
                 let index = e.currentTarget.dataset.index
                 let mainArray = data.retrieveData("projectArray");
 
-                addNote(mainArray, mainArray[index]); //wenn ein Project gelöscht wird, dann stimmt i nicht mehr
+                addNote(mainArray, mainArray[index]);
                 renderNote(mainArray[index]);
                 changeColor(e);
             })
@@ -165,7 +165,6 @@ function renderProject(array) { // hier kommt das mainArray rein
                 let parent = e.currentTarget.parentNode
                 let allDivs = document.querySelectorAll('#projects > div');
                 
-                //hier wird der die gespeicherte Position der Notes geändert
                 mainArray[parent.dataset.index].notes.forEach((item) => {
                     if(parent.dataset.index > item.projectIndex)
                     item.projectIndex -=1
@@ -190,7 +189,7 @@ function cacheDOMNote() {
     return {noteContainer, title, description, duedate, deleteButton, editButton, checkBox};
 }
 
-function renderNote(projectObject) { //recieved das projObj
+function renderNote(projectObject) {
     let allNotes = document.querySelectorAll('.note h2');
     let container = projectObject
     let notesArray = projectObject.notes
@@ -203,7 +202,7 @@ function renderNote(projectObject) { //recieved das projObj
         
         if(!isCreated) {
             
-            notesArray[i].index = i; // könnte auch beim pushen hinzugefügt werden
+            notesArray[i].index = i;
 
             content.appendChild(createNote());
             cacheDOMNote().title.textContent = notesArray[i].title;
