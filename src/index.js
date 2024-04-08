@@ -1,7 +1,6 @@
 import './style.css';
 import { createNote , createProject} from './createDOM';
 import {format} from 'date-fns';
-//import { data } from './storage';
 
 const home = document.getElementById('home');
 const content = document.getElementById('content');
@@ -12,6 +11,11 @@ let noteForm = document.getElementById('noteForm');
 const projectDialog = document.getElementById('projectDialog');
 const projectForm = document.getElementById('projectForm');
 const openProjectForm = document.getElementById('newProject');
+const dateInput = document.getElementById('duedate')
+
+let getToday = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Date().getDate()}`;
+let setToday = format(new Date(getToday),'yyyy-MM-dd');
+dateInput.value = setToday;
 
 (function (){
     if(!localStorage.getItem("projectArray")) {
@@ -35,10 +39,6 @@ let data = {
     },
 }
 
-
-//let mainArray = [];
-//let homeArray = [];
-
 class Note {
     constructor(title, description, duedate, priority) {
         this.title = title;
@@ -52,14 +52,6 @@ class Note {
     return  format(new Date(this.duedate), 'dd.MMMM');
     }
 }
-
-/* let noteIns = new Note("Task", "Long description of words", "2024-03-21", "middle");
-let newTask = new Note("Cleaning", "I have to clean the whole godamn house", "2024-04-10", "low")
-let task = new Note("coding", "i have to code a lot and it huerts", "2024-03-30", "high"); */
-
-/* pushToArray(homeArray, noteIns);
-pushToArray(homeArray, newTask);
-pushToArray(homeArray, task); */
 
 
 openProjectForm.addEventListener('click', () => projectDialog.showModal())
@@ -76,8 +68,6 @@ function homeComponent() {
     removePreviousContent();
     addNote(mainArray, mainArray[0])
     renderNote(mainArray[0]);
-//console.log(homeArray);
-//console.log(mainArray);
 }
 
 projectForm.addEventListener('submit', (e)=> {
@@ -97,16 +87,12 @@ function addProject(title) {
 
     pushToArray(mainArray, newProject);// fügt das ProjObj zu mainArray hinzu
     renderProject(mainArray);
-
-console.log(mainArray);
-
     addNote(mainArray, newProject) // soll neue Notiz zum array im Project-obj hinzufügen
     removePreviousContent();
     renderNote(newProject);
 
     data.sendData(mainArray);
 
-console.log(mainArray)
     projectDialog.close();
     projectForm.reset();
 }
@@ -132,8 +118,6 @@ function addNote(main, projectObject) { //hier wird das note Array aus projectOb
 
         noteDialog.close();
         noteForm.reset();
-    console.log(main);
-//hier muss aber das mainArray überschrieben werden mit der neuen Notiz
     })
 }
 
@@ -164,7 +148,6 @@ function renderProject(array) { // hier kommt das mainArray rein
             cacheDOMProject().projectContainer.addEventListener('click', (e) => {
                 removePreviousContent();
                 let index = e.currentTarget.dataset.index
-                console.log(index)
 
                 let mainArray = data.retrieveData("projectArray");
 
@@ -172,7 +155,7 @@ function renderProject(array) { // hier kommt das mainArray rein
                 addNote(mainArray, mainArray[index]); //wenn ein Project gelöscht wird, dann stimmt i nicht mehr
                 renderNote(mainArray[index]);
                 
-                let allElements = document.querySelectorAll('#projects > div');
+                let allElements = document.querySelectorAll('#projects > div, #home');
                 allElements.forEach((item)=> item.classList.remove('selected'));
                 e.currentTarget.classList.add('selected');
             })
@@ -182,30 +165,26 @@ function renderProject(array) { // hier kommt das mainArray rein
                 let parent = e.currentTarget.parentNode
                 let allDivs = document.querySelectorAll('#projects > div');
                 
+                //hier wird der die gespeicherte Position der Notes geändert
                 mainArray[parent.dataset.index].notes.forEach((item) => {
                     if(parent.dataset.index > item.projectIndex)
                     item.projectIndex -=1
                 })
+                //hier wird der index im Object geändert:
                 mainArray.forEach((item) => {
                     if(item.index > parent.dataset.index)
                     item.index -= 1
                 });
-                mainArray.splice(parent.dataset.index,1); //wenn es danach steht sollte es den Error fixen, dass er .notes nicht lesen kann, weil da kein Obj mehr ist
-
-
+                //hier wird der index im DOM geändert:
                 allDivs.forEach((item) => {
                     if(item.dataset.index > parent.dataset.index) {
                         item.dataset.index -= 1;
                         }
-                    })
+                })                
+                mainArray.splice(parent.dataset.index,1); //wenn es danach steht sollte es den Error fixen, dass er .notes nicht lesen kann, weil da kein Obj mehr ist
 
                 parent.remove()
-                /* removeFromArray(mainArray, projectObject); // entfernt nur index 1 > die connecteten indices stimmen auch nicht mehr
-                console.log(mainArray);
-                console.log(projectObject) */
-                //removeFromDOM(e);
-                console.log(mainArray);
-
+                /* removeFromArray(mainArray, projectObject); // entfernt nur index 1 > die connecteten indices stimmen auch nicht mehr*/
                 data.sendData(mainArray)
             })
         }
@@ -304,31 +283,12 @@ function removeFromArray(array, object) {
         if(item.index > object.index) 
         item.index -= 1;
       })
-console.log(array);
-}
-
-function removeFromDOM(e) {
-    let button = e.currentTarget;
-    let parent = button.parentNode;
-    let allDivs = document.querySelectorAll('#sidebar div');
-    console.log(allDivs);
-
-    allDivs.forEach((item) => {
-    if(item.dataset.index > parent.dataset.index) {
-        item.dataset.index -= 1;
-        }
-    })
-    
-
-    console.log(parent.dataset.index)
-    parent.remove();
 }
 
 function removePreviousContent() {
     let allElements = content.querySelectorAll('.note');
     allElements.forEach((node) => node.remove());
 }
-
 
 function editNote(object) {
 
@@ -354,6 +314,28 @@ function editNote(object) {
     noteDialog.showModal();
 }
 
-home.addEventListener('click', ()=> homeComponent());
+home.addEventListener('click', (e)=> {
+    homeComponent();
+    let allElements = document.querySelectorAll('#projects > div, #home');
+    allElements.forEach((item)=> item.classList.remove('selected'));
+    e.currentTarget.classList.add('selected');
+});
+
+
+let exampleNote = new Note("Laundry", "Wash all the clothes and fold the old ones", "2024-04-23", "low");
+let example = new Note("Book flight", "Book flight to Argentina for vacation", "2024-04-29", "high");
+let ex = new Note ("Buy present", "Buy birthday present for sisters birthday", "2024-05-03", "middle");
+
+function displayExamples() {
+    let mainArray = data.retrieveData("projectArray");
+    mainArray[0].notes.push(exampleNote);
+    mainArray[0].notes.push(example);
+    mainArray[0].notes.push(ex);
+
+    data.sendData(mainArray);
+}
+
+
+displayExamples()
 homeComponent();
 renderProject(data.retrieveData("projectArray"));

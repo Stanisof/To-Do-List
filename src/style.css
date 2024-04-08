@@ -24,12 +24,20 @@
     background-color: transparent;
     font-weight: bold;
     font-size: 50px;
-    margin: 30px ;
+    margin: 30px;
+}
+
+#home:hover {
+    text-decoration: underline #088faf;
 }
 
 h1 {
     padding-left: 25px;
     margin-bottom: 15px;
+}
+
+#sidebar > .selected {
+    text-decoration: underline #088faf;
 }
 
 #projects > .selected {

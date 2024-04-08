@@ -1,5 +1,3 @@
-/* import editSVG from './svg/pencil-circle.svg' */
-
 function createSvgX() {
     const svgX = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgX.setAttribute('viewBox', '0 0 24 24');
@@ -20,26 +18,6 @@ function createSvgPencil() {
     return svgPencil
 }
 
-function createSvgPlus() {
-    const svgPlus = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgPlus.setAttribute('viewBox', '0 0 24 24');
-    const pathPlus = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-    pathPlus.setAttribute("d","M18.5 2H5.5C3.6 2 2 3.6 2 5.5V18.5C2 20.4 3.6 22 5.5 22H16L22 16V5.5C22 3.6 20.4 2 18.5 2M13 16H11V13H8V11H11V8H13V11H16V13H13V16M15 20V18.5C15 16.6 16.6 15 18.5 15H20L15 20Z");
-    svgPlus.appendChild(pathPlus);
-
-    return svgPlus
-}
-
-function createSvgCheck() {
-    const svgCheck = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svgCheck.setAttribute('viewBox', '0 0 24 24');
-    const pathCheck = document.createElementNS("http://www.w3.org/2000/svg", 'path');
-    pathCheck.setAttribute("d","M17,14H19V17H22V19H19V22H17V19H14V17H17V14M10,2H14A2,2 0 0,1 16,4V6H20A2,2 0 0,1 22,8V13.53C20.94,12.58 19.54,12 18,12A6,6 0 0,0 12,18C12,19.09 12.29,20.12 12.8,21H4C2.89,21 2,20.1 2,19V8C2,6.89 2.89,6 4,6H8V4C8,2.89 8.89,2 10,2M14,6V4H10V6H14Z");
-    svgCheck.appendChild(pathCheck);
-
-    return svgCheck
-}
-
 function createSvgTrash() {
     const svgTrash = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgTrash.setAttribute('viewBox', '0 0 24 24');
@@ -50,17 +28,6 @@ function createSvgTrash() {
     return svgTrash
 }
 
-//maybe not best practice bc it creates + adds listener + caches for dialog
-/* function createNoteButton() {
-    const noteButton = document.createElement('button');
-    noteButton.setAttribute('id','add');
-    noteButton.appendChild(createSvgPlus());
-
-    const noteDialog = document.getElementById('noteDialog');
-
-    return {noteButton, noteDialog}
-} */
-
 function createNote() {
     let noteContainer = document.createElement('div');
     noteContainer.className = 'note';
@@ -68,7 +35,6 @@ function createNote() {
     const deleteButton = document.createElement('button');
     deleteButton.setAttribute('id','delete');
     deleteButton.appendChild(createSvgX());
-    //deleteButton.addEventListener('click', () => noteContainer.remove())
 
     let headArea = document.createElement('div');
     let title = document.createElement('h2');
@@ -86,7 +52,6 @@ function createNote() {
     const editButton = document.createElement('button');
     editButton.setAttribute('id', 'edit');
     editButton.appendChild(createSvgPencil());
-
 
 
     noteContainer.appendChild(deleteButton);
