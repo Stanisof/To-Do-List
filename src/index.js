@@ -17,28 +17,6 @@ let getToday = `${new Date().getFullYear()}-${new Date().getMonth()+1}-${new Dat
 let setToday = format(new Date(getToday),'yyyy-MM-dd');
 dateInput.value = setToday;
 
-(function (){
-    if(!localStorage.getItem("projectArray")) {
-        let projectArray = [];
-        let homeArray = {title: "Home",
-                         index: 0,
-                        notes: [],}
-        projectArray.push(homeArray);
-        localStorage.setItem("projectArray", JSON.stringify(projectArray))
-    }
-})()
-
-let data = {
-    sendData: function(array) {
-        localStorage.clear();
-        localStorage.setItem("projectArray", JSON.stringify(array));
-    },
-    retrieveData: function(string) {
-        //localStorage.removeItem(string);
-        return JSON.parse(localStorage.getItem(string))
-    },
-}
-
 class Note {
     constructor(title, description, duedate, priority) {
         this.title = title;
@@ -53,9 +31,38 @@ class Note {
     }
 }
 
+let exampleNote = new Note("Laundry", "Wash all the clothes and fold the old ones", "2024-04-23", "low");
+let example = new Note("Book flight", "Book flight to Argentina for vacation", "2024-04-29", "high");
+let ex = new Note ("Buy present", "Buy birthday present for sisters birthday", "2024-05-03", "middle");
+
+
+(function (){
+    if(!localStorage.getItem("projectArray")) {
+        let projectArray = [];
+        let homeArray = {title: "Home",
+                         index: 0,
+                        notes: [exampleNote, example, ex],}
+        projectArray.push(homeArray);
+        localStorage.setItem("projectArray", JSON.stringify(projectArray))
+    }
+})()
+
+let data = {
+    sendData: function(array) {
+        localStorage.clear();
+        localStorage.setItem("projectArray", JSON.stringify(array));
+    },
+    retrieveData: function(string) {
+        return JSON.parse(localStorage.getItem(string))
+    },
+}
 
 openProjectForm.addEventListener('click', () => projectDialog.showModal())
-openNoteForm.addEventListener('click', () => noteDialog.showModal());
+openNoteForm.addEventListener('click', () => {
+    let dateInput = document.getElementById('duedate')
+    dateInput.value = setToday;
+    noteDialog.showModal();
+});
 
 function pushToArray(array, object) {
     if(!array.includes(object)) {
@@ -143,21 +150,14 @@ function renderProject(array) { // hier kommt das mainArray rein
             cacheDOMProject().projectTitle.textContent = array[i].title;
             cacheDOMProject().projectContainer.setAttribute("data-index", i)
 
-            //let projectObject = array[i];
-
             cacheDOMProject().projectContainer.addEventListener('click', (e) => {
                 removePreviousContent();
                 let index = e.currentTarget.dataset.index
-
                 let mainArray = data.retrieveData("projectArray");
-
 
                 addNote(mainArray, mainArray[index]); //wenn ein Project gelöscht wird, dann stimmt i nicht mehr
                 renderNote(mainArray[index]);
-                
-                let allElements = document.querySelectorAll('#projects > div, #home');
-                allElements.forEach((item)=> item.classList.remove('selected'));
-                e.currentTarget.classList.add('selected');
+                changeColor(e);
             })
 
             cacheDOMProject().trashProject.addEventListener('click',(e)=> {
@@ -170,21 +170,7 @@ function renderProject(array) { // hier kommt das mainArray rein
                     if(parent.dataset.index > item.projectIndex)
                     item.projectIndex -=1
                 })
-                //hier wird der index im Object geändert:
-                mainArray.forEach((item) => {
-                    if(item.index > parent.dataset.index)
-                    item.index -= 1
-                });
-                //hier wird der index im DOM geändert:
-                allDivs.forEach((item) => {
-                    if(item.dataset.index > parent.dataset.index) {
-                        item.dataset.index -= 1;
-                        }
-                })                
-                mainArray.splice(parent.dataset.index,1); //wenn es danach steht sollte es den Error fixen, dass er .notes nicht lesen kann, weil da kein Obj mehr ist
-
-                parent.remove()
-                /* removeFromArray(mainArray, projectObject); // entfernt nur index 1 > die connecteten indices stimmen auch nicht mehr*/
+                removeElement(mainArray, e, allDivs)
                 data.sendData(mainArray)
             })
         }
@@ -230,39 +216,19 @@ function renderNote(projectObject) { //recieved das projObj
             cacheDOMNote().deleteButton.addEventListener('click', (e) => {
                 let mainArray = data.retrieveData("projectArray");
                 let allNotes = document.querySelectorAll('#content > div');
-                let parent = e.currentTarget.parentNode;
                 let mainPosition = notesArray[0].projectIndex;
 
-                notesArray.splice(parent.dataset.index,1);
-                allNotes.forEach((item)=> {
-                    if(item.dataset.index > parent.dataset.index)
-                    item.dataset.index -= 1;
-                }) 
-                //removeFromArray(notesArray, notesArray[i]);
+                removeElement(notesArray, e, allNotes)
                 mainArray[mainPosition].notes = notesArray;
-
-                parent.remove()
-                data.sendData(mainArray);
-                //removeFromDOM(e);
-                
+                data.sendData(mainArray);                
             })
 
             cacheDOMNote().editButton.addEventListener('click', (e) => {
-                
+                let allNotes = document.querySelectorAll('#content > div')
                 let parent = e.currentTarget.parentNode;
 
                 editNote(notesArray[parent.dataset.index]);
-                notesArray.splice(parent.dataset.index,1);
-                allNotes.forEach((item)=> {
-                    if(item.dataset.index > parent.dataset.index)
-                    item.dataset.index -= 1;
-                })
-                parent.remove()
-                //senden müsste nicht notwendig sein, da es submitted wird
-
-                
-                //removeFromArray(notesArray, notesArray[i]);
-                //removeFromDOM(e);
+                removeElement(notesArray, e, allNotes)
             })
 
             cacheDOMNote().checkBox.addEventListener('change', (e) => {
@@ -275,14 +241,19 @@ function renderNote(projectObject) { //recieved das projObj
 }
 
 
-function removeFromArray(array, object) {
-
-      array.splice(object.index,1);
-  
-      array.forEach((item)=> {
-        if(item.index > object.index) 
-        item.index -= 1;
-      })
+function removeElement(array, e, elements) {
+    let parent = e.currentTarget.parentNode
+    array.forEach((item) => {
+        if(item.index > parent.dataset.index)
+        item.index -= 1
+    });
+    elements.forEach((item) => {
+        if(item.dataset.index > parent.dataset.index) {
+            item.dataset.index -= 1;
+            }
+    });
+    array.splice(parent.dataset.index, 1);
+    parent.remove();
 }
 
 function removePreviousContent() {
@@ -299,9 +270,9 @@ function editNote(object) {
     let middleInput = document.getElementById('middle');
     let highInput = document.getElementById('high');
 
-    taskInput.setAttribute('value', object.title);
+    taskInput.value = object.title;
     descriptionInput.value = object.description;
-    dateInput.setAttribute('value', object.duedate);
+    dateInput.value = object.duedate;
     switch(object.priority) {
         case('low'): lowInput.setAttribute('checked', '')
             break
@@ -314,28 +285,16 @@ function editNote(object) {
     noteDialog.showModal();
 }
 
-home.addEventListener('click', (e)=> {
-    homeComponent();
+function changeColor(e) {
     let allElements = document.querySelectorAll('#projects > div, #home');
     allElements.forEach((item)=> item.classList.remove('selected'));
-    e.currentTarget.classList.add('selected');
-});
-
-
-let exampleNote = new Note("Laundry", "Wash all the clothes and fold the old ones", "2024-04-23", "low");
-let example = new Note("Book flight", "Book flight to Argentina for vacation", "2024-04-29", "high");
-let ex = new Note ("Buy present", "Buy birthday present for sisters birthday", "2024-05-03", "middle");
-
-function displayExamples() {
-    let mainArray = data.retrieveData("projectArray");
-    mainArray[0].notes.push(exampleNote);
-    mainArray[0].notes.push(example);
-    mainArray[0].notes.push(ex);
-
-    data.sendData(mainArray);
+    e.currentTarget.classList.add('selected');    
 }
 
+home.addEventListener('click', (e)=> {
+    homeComponent();
+    changeColor(e);
+});
 
-displayExamples()
 homeComponent();
 renderProject(data.retrieveData("projectArray"));

@@ -80,6 +80,7 @@ h1 {
 
 #projectDialog input {
     background-color: #088faf;
+    width: max(80%, 150px);
 }
 
 #submitTitle {
